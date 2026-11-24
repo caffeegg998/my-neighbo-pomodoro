@@ -36,6 +36,14 @@ struct Settings {
     classic_size_percent: u32,
     #[serde(default = "default_timer_size_percent")]
     classic_clock_percent: u32,
+    #[serde(default = "default_timer_size_percent")]
+    amply_size_percent: u32,
+    #[serde(default = "default_timer_size_percent")]
+    amply_clock_percent: u32,
+    #[serde(default = "default_timer_size_percent")]
+    drum_size_percent: u32,
+    #[serde(default = "default_timer_size_percent")]
+    drum_clock_percent: u32,
     #[serde(default, skip_serializing)]
     timer_size_percent: Option<u32>,
 }
@@ -75,6 +83,10 @@ impl Default for Settings {
             travel_clock_percent: default_timer_size_percent(),
             classic_size_percent: default_timer_size_percent(),
             classic_clock_percent: default_timer_size_percent(),
+            amply_size_percent: default_timer_size_percent(),
+            amply_clock_percent: default_timer_size_percent(),
+            drum_size_percent: default_timer_size_percent(),
+            drum_clock_percent: default_timer_size_percent(),
             timer_size_percent: None,
         }
     }
@@ -490,11 +502,18 @@ fn save_settings(state: State<'_, AppState>, settings: Settings) -> Result<Setti
         || !(2..=12).contains(&settings.long_break_every)
         || !matches!(settings.language.as_str(), "" | "en" | "vi")
         || !matches!(settings.theme.as_str(), "system" | "light" | "dark")
-        || !matches!(settings.timer_style.as_str(), "travel" | "classic")
+        || !matches!(
+            settings.timer_style.as_str(),
+            "travel" | "classic" | "amply" | "drum"
+        )
         || !(70..=120).contains(&settings.travel_size_percent)
         || !(70..=120).contains(&settings.travel_clock_percent)
         || !(70..=120).contains(&settings.classic_size_percent)
         || !(70..=120).contains(&settings.classic_clock_percent)
+        || !(70..=120).contains(&settings.amply_size_percent)
+        || !(70..=120).contains(&settings.amply_clock_percent)
+        || !(70..=120).contains(&settings.drum_size_percent)
+        || !(70..=120).contains(&settings.drum_clock_percent)
     {
         return Err("Invalid settings".into());
     }
@@ -949,6 +968,10 @@ mod tests {
         value.as_object_mut().unwrap().remove("travelClockPercent");
         value.as_object_mut().unwrap().remove("classicSizePercent");
         value.as_object_mut().unwrap().remove("classicClockPercent");
+        value.as_object_mut().unwrap().remove("amplySizePercent");
+        value.as_object_mut().unwrap().remove("amplyClockPercent");
+        value.as_object_mut().unwrap().remove("drumSizePercent");
+        value.as_object_mut().unwrap().remove("drumClockPercent");
         let settings: Settings = serde_json::from_value(value).unwrap();
         assert!(!settings.test_mode);
         assert_eq!(settings.timer_style, "travel");
@@ -956,6 +979,10 @@ mod tests {
         assert_eq!(settings.travel_clock_percent, 100);
         assert_eq!(settings.classic_size_percent, 100);
         assert_eq!(settings.classic_clock_percent, 100);
+        assert_eq!(settings.amply_size_percent, 100);
+        assert_eq!(settings.amply_clock_percent, 100);
+        assert_eq!(settings.drum_size_percent, 100);
+        assert_eq!(settings.drum_clock_percent, 100);
     }
 
     #[test]
@@ -1056,10 +1083,8 @@ mod tests {
 
     #[test]
     fn read_sessions_includes_history_older_than_thirty_days() {
-        let path = std::env::temp_dir().join(format!(
-            "pomodoro-vibe-history-{}.sqlite",
-            Uuid::new_v4()
-        ));
+        let path =
+            std::env::temp_dir().join(format!("pomodoro-vibe-history-{}.sqlite", Uuid::new_v4()));
         let state = AppState::new(&path).unwrap();
         let inner = lock(&state).unwrap();
         let ended_at_ms = now_ms() - 45 * 24 * 60 * 60 * 1000;

@@ -2,7 +2,7 @@ export type Phase = 'focus' | 'shortBreak' | 'longBreak';
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
 export type Language = 'en' | 'vi';
 export type Theme = 'system' | 'light' | 'dark';
-export type TimerStyle = 'travel' | 'classic';
+export type TimerStyle = 'travel' | 'classic' | 'amply' | 'drum';
 
 export interface Task {
   id: string;
@@ -34,6 +34,10 @@ export interface Settings {
   travelClockPercent: number;
   classicSizePercent: number;
   classicClockPercent: number;
+  amplySizePercent: number;
+  amplyClockPercent: number;
+  drumSizePercent: number;
+  drumClockPercent: number;
 }
 
 export interface TimerSnapshot {
@@ -67,6 +71,10 @@ export const defaultSettings: Settings = {
   travelClockPercent: 100,
   classicSizePercent: 100,
   classicClockPercent: 100,
+  amplySizePercent: 100,
+  amplyClockPercent: 100,
+  drumSizePercent: 100,
+  drumClockPercent: 100,
 };
 
 export function durationFor(phase: Phase, settings: Settings): number {

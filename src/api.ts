@@ -20,12 +20,16 @@ function readMock(): MockState {
     const stored = localStorage.getItem(mockKey);
     const state = stored ? JSON.parse(stored) as MockState : freshMock();
     state.settings.testMode ??= false;
-    if (!['travel', 'classic'].includes(state.settings.timerStyle)) state.settings.timerStyle = 'travel';
+    if (!['travel', 'classic', 'amply', 'drum'].includes(state.settings.timerStyle)) state.settings.timerStyle = 'travel';
     const legacySize = (state.settings as Settings & { timerSizePercent?: number }).timerSizePercent;
     state.settings.travelSizePercent ??= legacySize ?? defaultSettings.travelSizePercent;
     state.settings.classicSizePercent ??= legacySize ?? defaultSettings.classicSizePercent;
     state.settings.travelClockPercent ??= defaultSettings.travelClockPercent;
     state.settings.classicClockPercent ??= defaultSettings.classicClockPercent;
+    state.settings.amplySizePercent ??= defaultSettings.amplySizePercent;
+    state.settings.amplyClockPercent ??= defaultSettings.amplyClockPercent;
+    state.settings.drumSizePercent ??= defaultSettings.drumSizePercent;
+    state.settings.drumClockPercent ??= defaultSettings.drumClockPercent;
     delete (state.settings as Settings & { timerSizePercent?: number }).timerSizePercent;
     return state;
   } catch { return freshMock(); }

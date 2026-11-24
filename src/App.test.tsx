@@ -19,7 +19,7 @@ beforeEach(() => {
   vi.stubGlobal('crypto', { randomUUID: () => 'task-1' });
 });
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('main workflow', () => {
   it('shows Travel by default and saves the classic timer style', async () => {
@@ -79,6 +79,89 @@ describe('main workflow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Focus' }));
     await waitFor(() => expect(document.querySelector<HTMLElement>('.timer-card-classic .timer-stage')?.style.getPropertyValue('--timer-stage-px')).toBe('288px'));
     expect(document.querySelector<HTMLElement>('.timer-card-classic .timer-stage')?.style.getPropertyValue('--timer-digits-large')).toBe('51px');
+  });
+
+  it('shows Amply with the clock on the speaker and saves its own sizes', async () => {
+    render(<App />);
+    await screen.findByText('Your focus space');
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Amply' }));
+    expect(document.querySelector('.timer-style-preview-amply .amply-art')).not.toBeNull();
+    const overall = screen.getByRole('slider', { name: 'Overall size' }) as HTMLInputElement;
+    const clock = screen.getByRole('slider', { name: 'Clock digits size' }) as HTMLInputElement;
+    fireEvent.change(overall, { target: { value: '110' } });
+    fireEvent.change(clock, { target: { value: '85' } });
+    fireEvent.click(screen.getByRole('radio', { name: 'Travel' }));
+    expect(overall.value).toBe('100');
+    expect(clock.value).toBe('100');
+    fireEvent.click(screen.getByRole('radio', { name: 'Amply' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Theme' }), { target: { value: 'dark' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save preferences' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Focus' }));
+    const stage = await waitFor(() => {
+      const element = document.querySelector<HTMLElement>('.timer-card-amply .timer-stage');
+      expect(element).not.toBeNull();
+      return element!;
+    });
+    expect(stage.querySelector('.amply-art')).not.toBeNull();
+    expect(stage.querySelector('.amply-art-dark')).not.toBeNull();
+    expect(stage.querySelector('.amply-guitar-art-dark')).not.toBeNull();
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe('dark'));
+    expect(stage.lastElementChild?.classList.contains('amply-guitar-layer')).toBe(true);
+    expect(stage.lastElementChild?.querySelectorAll('.amply-guitar-art')).toHaveLength(2);
+    const guitarLayer = stage.lastElementChild;
+    fireEvent.click(screen.getByRole('button', { name: 'Theme: Light' }));
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe('light'));
+    expect(stage.lastElementChild).toBe(guitarLayer);
+    const guitarStrings = stage.querySelectorAll('.amply-string');
+    expect(guitarStrings).toHaveLength(6);
+    const straightString = guitarStrings[0].getAttribute('points');
+    fireEvent.click(screen.getByRole('button', { name: 'Strum guitar' }));
+    expect(guitarStrings[0].getAttribute('points')).not.toBe(straightString);
+    expect(stage.querySelector('.amply-speaker-pulse')).not.toBeNull();
+    expect(stage.querySelector('.timer-center .timer-digits')?.textContent).toBe('25:00');
+    expect(stage.style.getPropertyValue('--timer-stage-px')).toBe('484px');
+    expect(stage.style.getPropertyValue('--timer-digits-large')).toBe('28px');
+    const saved = (await api.bootstrap()).settings;
+    expect([saved.timerStyle, saved.amplySizePercent, saved.amplyClockPercent]).toEqual(['amply', 110, 85]);
+  });
+
+  it('saves Drum sizes and plays the original kit by pointer and keyboard', async () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+    render(<App />);
+    await screen.findByText('Your focus space');
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Drum' }));
+    expect(document.querySelector('.timer-style-preview-drum .drum-art svg')).not.toBeNull();
+    fireEvent.change(screen.getByRole('slider', { name: 'Overall size' }), { target: { value: '110' } });
+    fireEvent.change(screen.getByRole('slider', { name: 'Clock digits size' }), { target: { value: '90' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save preferences' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Focus' }));
+    const stage = await waitFor(() => {
+      const element = document.querySelector<HTMLElement>('.timer-card-drum .timer-stage');
+      expect(element).not.toBeNull();
+      return element!;
+    });
+    expect(stage.style.getPropertyValue('--timer-stage-px')).toBe('484px');
+    expect(stage.style.getPropertyValue('--timer-digits-large')).toBe('32px');
+    const kick = stage.querySelector('[data-drum-part="kick"]') as SVGGElement;
+    const crash = stage.querySelector('[data-drum-part="crash"]') as SVGGElement;
+    const hiHat = stage.querySelector('[data-drum-part="hiHat"]') as SVGGElement;
+    await waitFor(() => expect(kick.getAttribute('aria-label')).toBe('Kick drum (B)'));
+    fireEvent.click(kick);
+    expect(kick.classList.contains('drum-hit')).toBe(true);
+    fireEvent.keyDown(kick, { key: ' ', code: 'Space' });
+    expect(screen.getByRole('button', { name: 'Start focus' })).toBeTruthy();
+    fireEvent.keyDown(window, { key: 'f' });
+    expect(crash.classList.contains('drum-hit')).toBe(true);
+    expect(stage.querySelector('.drum-show-keys')).not.toBeNull();
+    expect(stage.querySelector('#Key-70')?.classList.contains('drum-key-hit')).toBe(true);
+    for (let index = 0; index < 8; index += 1) fireEvent.click(hiHat);
+    expect(hiHat.classList.contains('drum-hat-open')).toBe(true);
+    expect(play).toHaveBeenCalledTimes(11);
+    expect(stage.querySelector('.timer-digits')?.textContent).toBe('25:00');
+    const saved = (await api.bootstrap()).settings;
+    expect([saved.timerStyle, saved.drumSizePercent, saved.drumClockPercent]).toEqual(['drum', 110, 90]);
   });
 
   it('counts a test mode focus completion in statistics', async () => {

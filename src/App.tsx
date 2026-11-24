@@ -7,6 +7,8 @@ import { isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notif
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { api } from './api';
 import { TravelScene } from './TravelScene';
+import { AmplyGuitar, AmplyScene } from './AmplyScene';
+import { DrumScene } from './DrumScene';
 import { effectiveLanguage, strings } from './i18n';
 import type { TranslationKey } from './i18n';
 import { dailyStats, dateKey, startOfWeek } from './stats';
@@ -21,23 +23,26 @@ const initialTimer: TimerSnapshot = {
 const phaseKeys: Phase[] = ['focus', 'shortBreak', 'longBreak'];
 const recentPageSize = 5;
 let audioContext: AudioContext | null = null;
+let guitarNoteIndex = 0;
+const guitarNotes = [196, 233.08, 261.63, 196, 233.08, 277.18, 261.63, 196, 233.08, 261.63, 233.08, 196];
 
 function timerStyleSizes(settings: Settings, style: TimerStyle = settings.timerStyle) {
-  return style === 'travel'
-    ? { stage: settings.travelSizePercent, clock: settings.travelClockPercent }
-    : { stage: settings.classicSizePercent, clock: settings.classicClockPercent };
+  if (style === 'travel') return { stage: settings.travelSizePercent, clock: settings.travelClockPercent };
+  if (style === 'amply') return { stage: settings.amplySizePercent, clock: settings.amplyClockPercent };
+  if (style === 'drum') return { stage: settings.drumSizePercent, clock: settings.drumClockPercent };
+  return { stage: settings.classicSizePercent, clock: settings.classicClockPercent };
 }
 
 function timerStageStyle(settings: Settings): CSSProperties {
   const sizes = timerStyleSizes(settings);
   const stageScale = sizes.stage / 100;
   const clockScale = sizes.clock / 100;
-  const baseWidth = settings.timerStyle === 'travel' ? 340 : 320;
+  const baseWidth = settings.timerStyle === 'travel' ? 340 : settings.timerStyle === 'amply' || settings.timerStyle === 'drum' ? 440 : 320;
   const digits = settings.timerStyle === 'travel'
     ? [40, 40, 34]
-    : [76, 69, 61];
+    : settings.timerStyle === 'amply' ? [30, 28, 25] : settings.timerStyle === 'drum' ? [32, 30, 26] : [76, 69, 61];
   return {
-    '--timer-stage-px': `${baseWidth * stageScale}px`,
+    '--timer-stage-px': `${Math.round(baseWidth * stageScale)}px`,
     '--timer-stage-percent': `${sizes.stage}%`,
     '--timer-digits-large': `${Math.round(digits[0] * stageScale * clockScale)}px`,
     '--timer-digits-medium': `${Math.round(digits[1] * stageScale * clockScale)}px`,
@@ -74,6 +79,31 @@ function playCompletionSound(): void {
   } catch { /* Audio is optional. */ }
 }
 
+function playGuitarSound(): void {
+  try {
+    audioContext ??= new AudioContext();
+    const context = audioContext;
+    const frequency = guitarNotes[guitarNoteIndex++ % guitarNotes.length];
+    void context.resume().then(() => {
+      const at = context.currentTime;
+      const string = context.createOscillator();
+      const tone = context.createBiquadFilter();
+      const volume = context.createGain();
+      string.type = 'sawtooth';
+      string.frequency.setValueAtTime(frequency, at);
+      tone.type = 'lowpass';
+      tone.frequency.setValueAtTime(1800, at);
+      tone.frequency.exponentialRampToValueAtTime(450, at + .5);
+      volume.gain.setValueAtTime(.0001, at);
+      volume.gain.exponentialRampToValueAtTime(.08, at + .012);
+      volume.gain.exponentialRampToValueAtTime(.0001, at + .62);
+      string.connect(tone).connect(volume).connect(context.destination);
+      string.start(at);
+      string.stop(at + .65);
+    }).catch(() => { /* Guitar audio is optional. */ });
+  } catch { /* Guitar audio is optional. */ }
+}
+
 async function requestMacNotification(): Promise<void> {
   if (!api.isNative || !/Mac/i.test(navigator.userAgent)) return;
   try {
@@ -104,6 +134,7 @@ function App() {
   const [themeBusy, setThemeBusy] = useState(false);
   const [testModeBusy, setTestModeBusy] = useState(false);
   const [toast, setToast] = useState('');
+  const [amplyStrumCount, setAmplyStrumCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -112,8 +143,9 @@ function App() {
   const t = strings(language);
   const text = (key: TranslationKey) => t[key];
   const draftSizes = timerStyleSizes(draft);
-  const stageSizeField = draft.timerStyle === 'travel' ? 'travelSizePercent' : 'classicSizePercent';
-  const clockSizeField = draft.timerStyle === 'travel' ? 'travelClockPercent' : 'classicClockPercent';
+  const stageSizeField = draft.timerStyle === 'travel' ? 'travelSizePercent' : draft.timerStyle === 'amply' ? 'amplySizePercent' : draft.timerStyle === 'drum' ? 'drumSizePercent' : 'classicSizePercent';
+  const clockSizeField = draft.timerStyle === 'travel' ? 'travelClockPercent' : draft.timerStyle === 'amply' ? 'amplyClockPercent' : draft.timerStyle === 'drum' ? 'drumClockPercent' : 'classicClockPercent';
+  const timerDescriptions: Record<TimerStyle, string> = { travel: t.travelDescription, classic: t.classicDescription, amply: t.amplyDescription, drum: t.drumDescription };
   const activeTasks = tasks.filter((task) => !task.completedAtMs);
   const completedTasks = tasks.filter((task) => task.completedAtMs);
   const selectedTask = tasks.find((task) => task.id === selectedTaskId && !task.completedAtMs) ?? null;
@@ -229,12 +261,13 @@ function App() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.closest('input, textarea, select, [contenteditable="true"]')) return;
+      if (event.defaultPrevented) return;
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
       if ((event.metaKey || event.ctrlKey) && ['1', '2', '3', '4'].includes(event.key)) {
         event.preventDefault();
         setView((['focus', 'tasks', 'stats', 'settings'] as View[])[Number(event.key) - 1]);
-      } else if (event.code === 'Space' && view === 'focus' && !event.repeat && !target.closest('button, a')) {
+      } else if (event.code === 'Space' && view === 'focus' && !event.repeat && !target?.closest('button, a, [role="button"]')) {
         event.preventDefault();
         document.querySelector<HTMLButtonElement>('[data-primary-timer]')?.click();
       }
@@ -395,8 +428,12 @@ function App() {
               <div className="phase-tabs" role="tablist" aria-label={t.timerSettings}>{phaseKeys.map((item) => <button role="tab" aria-selected={phase === item} key={item} type="button" disabled={timer.status === 'running' || timer.status === 'paused'} className={phase === item ? 'selected' : ''} onClick={() => setSelectedPhase(item)}>{item === 'focus' ? t.focus : t[item]}</button>)}</div>
               <div className="timer-stage" style={timerStageStyle(settings)}>
                 {settings.timerStyle === 'travel' && <TravelScene />}
+                {settings.timerStyle === 'amply' && <AmplyScene />}
+                {settings.timerStyle === 'drum' && <DrumScene language={language} />}
                 <svg className="timer-ring" viewBox="0 0 320 320" aria-hidden="true"><circle className="ring-track" cx="160" cy="160" r="143" /><circle className="ring-progress" cx="160" cy="160" r="143" strokeDasharray={`${Math.max(0, progress) * 898.5} 898.5`} /></svg>
+                {settings.timerStyle === 'amply' && amplyStrumCount > 0 && <span className="amply-speaker-pulse" key={amplyStrumCount} aria-hidden="true" />}
                 <div className="timer-center"><span className="timer-phase-icon">{phase === 'focus' ? <Clock size={22} weight="duotone" /> : <Coffee size={22} weight="duotone" />}</span><strong className="timer-digits"><span className="timer-number">{remainingMinutes}</span><span className="timer-separator">:</span><span className="timer-number">{remainingSecondsText}</span></strong><span className="timer-state">{timer.status === 'running' ? t.running : timer.status === 'paused' ? t.paused : timer.status === 'finished' ? t.finished : t.ready}</span></div>
+                {settings.timerStyle === 'amply' && <AmplyGuitar label={t.strumGuitar} onStrum={() => { playGuitarSound(); setAmplyStrumCount((count) => count + 1); }} />}
               </div>
               <div className="timer-controls">
                 <button data-primary-timer className="primary-button" type="button" disabled={busy} onClick={primaryTimerAction}>{timer.status === 'running' ? <Pause size={18} weight="fill" /> : <Play size={18} weight="fill" />}{timer.status === 'running' ? t.pause : timer.status === 'paused' ? t.resume : phase === 'focus' ? t.startFocus : t.startBreak}</button>
@@ -451,12 +488,12 @@ function App() {
           <section className="panel settings-panel timer-style-panel">
             <div className="settings-header"><span className="settings-icon"><AirplaneTilt size={21} /></span><div><h2>{t.timerStyle}</h2><p>{t.timerStyleHint}</p></div></div>
             <div className="timer-style-options" role="radiogroup" aria-label={t.timerStyle}>
-              {(['travel', 'classic'] as TimerStyle[]).map((style) => {
+              {(['travel', 'classic', 'amply', 'drum'] as TimerStyle[]).map((style) => {
                 const sizes = timerStyleSizes(draft, style);
                 return <label className={`timer-style-option${draft.timerStyle === style ? ' selected' : ''}`} key={style}>
                 <input type="radio" name="timerStyle" value={style} checked={draft.timerStyle === style} onChange={() => setDraft((old) => ({ ...old, timerStyle: style }))} aria-label={t[style]} />
-                {style === 'travel' ? <div className="timer-style-preview timer-style-preview-travel" aria-hidden="true"><div className="timer-style-preview-content" style={{ transform: `scale(${sizes.stage / 100})` }}><TravelScene mini /><span className="style-preview-time" style={{ transform: `scale(${sizes.clock / 100})` }}>{formatTime(draft.focusMinutes * 60)}</span></div></div> : <div className="timer-style-preview timer-style-preview-classic" aria-hidden="true"><span className="classic-mini-ring" style={{ transform: `scale(${sizes.stage / 100})` }}><span className="classic-preview-time" style={{ transform: `scale(${sizes.clock / 100})` }}>{formatTime(draft.focusMinutes * 60)}</span></span></div>}
-                <div className="timer-style-caption"><span><strong>{t[style]}</strong><small>{style === 'travel' ? t.travelDescription : t.classicDescription}</small></span>{draft.timerStyle === style && <Check size={16} weight="bold" aria-hidden="true" />}</div>
+                {style === 'travel' ? <div className="timer-style-preview timer-style-preview-travel" aria-hidden="true"><div className="timer-style-preview-content" style={{ transform: `scale(${sizes.stage / 100})` }}><TravelScene mini /><span className="style-preview-time" style={{ fontSize: `${10 * sizes.clock / 100}px` }}>{formatTime(draft.focusMinutes * 60)}</span></div></div> : style === 'amply' ? <div className="timer-style-preview timer-style-preview-amply" aria-hidden="true"><div className="timer-style-preview-content" style={{ transform: `scale(${sizes.stage / 100})` }}><AmplyScene mini /><span className="amply-preview-time" style={{ transform: "translate(-50%, -50%)", fontSize: `${7 * sizes.clock / 100}px` }}>{formatTime(draft.focusMinutes * 60)}</span><AmplyGuitar /></div></div> : style === 'drum' ? <div className="timer-style-preview timer-style-preview-drum" aria-hidden="true"><div className="timer-style-preview-content" style={{ transform: `scale(${sizes.stage / 100})` }}><DrumScene mini language={language} /><span className="drum-preview-time" style={{ transform: "translate(-50%, -50%)", fontSize: `${7 * sizes.clock / 100}px` }}>{formatTime(draft.focusMinutes * 60)}</span></div></div> : <div className="timer-style-preview timer-style-preview-classic" aria-hidden="true"><span className="classic-mini-ring" style={{ transform: `scale(${sizes.stage / 100})` }}><span className="classic-preview-time" style={{ fontSize: `${20 * sizes.clock / 100}px` }}>{formatTime(draft.focusMinutes * 60)}</span></span></div>}
+                <div className="timer-style-caption"><span><strong>{t[style]}</strong><small>{timerDescriptions[style]}</small></span>{draft.timerStyle === style && <Check size={16} weight="bold" aria-hidden="true" />}</div>
               </label>; })}
             </div>
             <div className="timer-size-control">
