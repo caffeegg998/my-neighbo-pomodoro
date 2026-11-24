@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Main desktop window permissions",
   "windows": ["main"],
-  "permissions": ["core:default", "core:window:allow-set-background-color", "core:window:allow-set-theme", "notification:default"]
+  "permissions": ["core:default", "core:window:allow-set-background-color", "core:window:allow-set-theme", "notification:default", "updater:default", "process:allow-restart"]
 }

@@ -9,6 +9,7 @@ import { api } from './api';
 import { TravelScene } from './TravelScene';
 import { AmplyGuitar, AmplyScene } from './AmplyScene';
 import { DrumScene } from './DrumScene';
+import { UpdatePanel } from './UpdatePanel';
 import { effectiveLanguage, strings } from './i18n';
 import type { TranslationKey } from './i18n';
 import { dailyStats, dateKey, startOfWeek } from './stats';
@@ -506,7 +507,9 @@ function App() {
                 <div className="timer-size-scale"><span>70% · {t.smaller}</span><span>120% · {t.larger}</span></div></div>
             </div>
           </section>
-          <section className="panel settings-panel"><div className="settings-header"><span className="settings-icon"><Moon size={21} /></span><div><h2>{t.appearance}</h2><p>{t.localOnly}</p></div></div><div className="settings-rows"><label className="setting-row"><span>{t.language}</span><select value={draft.language} onChange={(event) => setDraft((old) => ({ ...old, language: event.target.value as Settings['language'] }))}><option value="">{t.followSystem}</option><option value="en">{t.english}</option><option value="vi">{t.vietnamese}</option></select></label><label className="setting-row"><span>{t.theme}</span><select value={draft.theme} onChange={(event) => setDraft((old) => ({ ...old, theme: event.target.value as Settings['theme'] }))}><option value="system">{t.followSystem}</option><option value="light">{t.light}</option><option value="dark">{t.dark}</option></select></label><label className="setting-row"><span>{t.sound}</span><input className="toggle" type="checkbox" checked={draft.soundEnabled} onChange={(event) => setDraft((old) => ({ ...old, soundEnabled: event.target.checked }))} /></label></div></section><button className="primary-button save-preferences" type="submit"><Check size={18} />{t.saveSettings}</button></form>
+          <section className="panel settings-panel"><div className="settings-header"><span className="settings-icon"><Moon size={21} /></span><div><h2>{t.appearance}</h2><p>{t.localOnly}</p></div></div><div className="settings-rows"><label className="setting-row"><span>{t.language}</span><select value={draft.language} onChange={(event) => setDraft((old) => ({ ...old, language: event.target.value as Settings['language'] }))}><option value="">{t.followSystem}</option><option value="en">{t.english}</option><option value="vi">{t.vietnamese}</option></select></label><label className="setting-row"><span>{t.theme}</span><select value={draft.theme} onChange={(event) => setDraft((old) => ({ ...old, theme: event.target.value as Settings['theme'] }))}><option value="system">{t.followSystem}</option><option value="light">{t.light}</option><option value="dark">{t.dark}</option></select></label><label className="setting-row"><span>{t.sound}</span><input className="toggle" type="checkbox" checked={draft.soundEnabled} onChange={(event) => setDraft((old) => ({ ...old, soundEnabled: event.target.checked }))} /></label></div></section>
+          <UpdatePanel language={language} native={api.isNative} timerActive={timer.status === 'running' || timer.status === 'paused'} />
+          <button className="primary-button save-preferences" type="submit"><Check size={18} />{t.saveSettings}</button></form>
         </>}
       </div>}
     </main>

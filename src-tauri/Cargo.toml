@@ -1,6 +1,6 @@
 [package]
 name = "pomodoro-vibe"
-version = "0.1.0"
+version = "0.2.0"
 description = "A calm desktop Pomodoro app"
 authors = ["Pomodoro Vibe"]
 edition = "2021"
@@ -15,6 +15,8 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "image-png"] }
 tauri-plugin-notification = "2"
+tauri-plugin-process = "2.4.0"
+tauri-plugin-updater = "2.14.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rusqlite = { version = "0.32", features = ["bundled"] }
