@@ -108,5 +108,5 @@ jobs:
           extra=()
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then extra+=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" release-assets/* \
-            --title "Pomodoro Vibe $GITHUB_REF_NAME" \
+            --title "My Neighbor Pomodoro $GITHUB_REF_NAME" \
             --generate-notes --verify-tag "${extra[@]}"

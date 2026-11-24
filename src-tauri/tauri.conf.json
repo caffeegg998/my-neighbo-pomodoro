@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Pomodoro Vibe",
+  "productName": "My Neighbor Pomodoro",
   "version": "0.2.0",
   "identifier": "com.pomodorovibe.desktop",
   "build": {
@@ -10,7 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "title": "Pomodoro Vibe", "width": 1240, "height": 800, "minWidth": 900, "minHeight": 620, "backgroundColor": "#dce8df", "titleBarStyle": "Transparent" }],
+    "windows": [{ "title": "My Neighbor Pomodoro", "width": 1240, "height": 800, "minWidth": 900, "minHeight": 620, "backgroundColor": "#dce8df", "titleBarStyle": "Transparent" }],
     "security": { "csp": null }
   },
   "bundle": {

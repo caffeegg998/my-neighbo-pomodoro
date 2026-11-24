@@ -257,7 +257,7 @@ function App() {
   }, [settings.theme]);
 
   useEffect(() => {
-    document.title = timer.status === 'running' ? `${formatTime(remainingSeconds)} · Pomodoro Vibe` : 'Pomodoro Vibe';
+    document.title = timer.status === 'running' ? `${formatTime(remainingSeconds)} · My Neighbor Pomodoro` : 'My Neighbor Pomodoro';
   }, [remainingSeconds, timer.status]);
 
   useEffect(() => {

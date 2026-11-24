@@ -561,9 +561,9 @@ fn set_tray(app: &AppHandle, finished: bool) {
             let _ = tray.set_icon(Some(icon));
         }
         let _ = tray.set_tooltip(Some(if finished {
-            "Pomodoro Vibe — session finished"
+            "My Neighbor Pomodoro — session finished"
         } else {
-            "Pomodoro Vibe"
+            "My Neighbor Pomodoro"
         }));
     }
 }
@@ -872,9 +872,9 @@ fn set_tray_language(app: AppHandle, language: String) -> Result<(), String> {
         return Ok(());
     };
     let (show_text, quit_text) = if language == "vi" {
-        ("Mở Pomodoro Vibe", "Thoát")
+        ("Mở My Neighbor Pomodoro", "Thoát")
     } else {
-        ("Show Pomodoro Vibe", "Quit")
+        ("Show My Neighbor Pomodoro", "Quit")
     };
     let show = MenuItem::with_id(&app, "show", show_text, true, None::<&str>)
         .map_err(|e| e.to_string())?;
@@ -899,13 +899,13 @@ pub fn run() {
                 AppState::new(&dir.join("pomodoro-vibe.sqlite")).map_err(std::io::Error::other)?;
             app.manage(state);
 
-            let show = MenuItem::with_id(app, "show", "Show Pomodoro Vibe", true, None::<&str>)?;
+            let show = MenuItem::with_id(app, "show", "Show My Neighbor Pomodoro", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show, &quit])?;
             let icon = Image::from_bytes(include_bytes!("../icons/tray-idle.png"))?;
             TrayIconBuilder::with_id("main")
                 .icon(icon)
-                .tooltip("Pomodoro Vibe")
+                .tooltip("My Neighbor Pomodoro")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
@@ -954,7 +954,7 @@ pub fn run() {
             set_title_bar_color,
         ])
         .run(tauri::generate_context!())
-        .expect("failed to run Pomodoro Vibe");
+        .expect("failed to run My Neighbor Pomodoro");
 }
 
 #[cfg(test)]

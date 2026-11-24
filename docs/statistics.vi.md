@@ -1,6 +1,6 @@
 # Ghi nhận phiên tập trung vào Thống kê
 
-Pomodoro Vibe ghi nhận phiên **Tập trung** vào **Thống kê** khi đồng hồ chạy hết giờ hoặc khi bạn bấm **Chuyển phiên ngay** trong Test mode. Với Test mode, phiên được tính theo **toàn bộ thời lượng đã cài**, dù bạn chuyển sớm.
+My Neighbor Pomodoro ghi nhận phiên **Tập trung** vào **Thống kê** khi đồng hồ chạy hết giờ hoặc khi bạn bấm **Chuyển phiên ngay** trong Test mode. Với Test mode, phiên được tính theo **toàn bộ thời lượng đã cài**, dù bạn chuyển sớm.
 
 ## Hoàn thành một phiên được tính vào Thống kê
 

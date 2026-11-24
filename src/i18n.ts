@@ -1,7 +1,7 @@
 import type { Language } from './types';
 
 const en = {
-  appName: 'Pomodoro Vibe', tagline: 'Make room for focus', workspace: 'Workspace', yourDay: 'Your day', navigation: 'Main navigation', focus: 'Focus', tasks: 'Tasks', stats: 'Statistics', settings: 'Settings',
+  appName: 'My Neighbor Pomodoro', tagline: 'Make room for focus', workspace: 'Workspace', yourDay: 'Your day', navigation: 'Main navigation', focus: 'Focus', tasks: 'Tasks', stats: 'Statistics', settings: 'Settings',
   today: 'Today', thisWeek: 'This week', minutes: 'min', sessions: 'sessions', session: 'session',
   weekView: 'Weekly view', chooseDate: 'Choose date', weekNavigation: 'Chart weeks', previousWeek: 'Previous week', nextWeek: 'Next week',
   focusSpace: 'Your focus space', focusSubtitle: 'One thing at a time. The rest can wait.',
@@ -22,7 +22,7 @@ const en = {
   drumCrash: 'Crash cymbal', drumLeftTom: 'Left tom', drumRightTom: 'Right tom', drumFloorTom: 'Floor tom', drumKick: 'Kick drum', drumSnare: 'Snare drum', drumHiHat: 'Hi-hat',
   timerSize: 'Overall size', clockSize: 'Clock digits size', styleSizeHint: 'Each style keeps its own size settings.', smaller: 'Smaller', larger: 'Larger',
   localOnly: 'Your data stays on this device.', closeHint: 'Closing the window keeps the timer running in the tray.',
-  updates: 'App updates', updatesHint: 'Get the latest version of Pomodoro Vibe.', currentVersion: 'Current version',
+  updates: 'App updates', updatesHint: 'Get the latest version of My Neighbor Pomodoro.', currentVersion: 'Current version',
   checkForUpdates: 'Check for updates', checkingUpdates: 'Checking for updates…', upToDate: 'You are up to date.',
   updateAvailable: 'Version {version} is available', installUpdate: 'Download and install', downloadingUpdate: 'Downloading update', installingUpdate: 'Installing update. The app will restart.',
   updateCheckFailed: 'Could not check for updates. Please try again.', updateInstallFailed: 'Could not install the update. Please try again.',
@@ -33,7 +33,7 @@ const en = {
 } as const;
 
 const vi: Record<keyof typeof en, string> = {
-  appName: 'Pomodoro Vibe', tagline: 'Dành chỗ cho sự tập trung', workspace: 'Không gian làm việc', yourDay: 'Ngày của bạn', navigation: 'Điều hướng chính', focus: 'Tập trung', tasks: 'Công việc', stats: 'Thống kê', settings: 'Cài đặt',
+  appName: 'My Neighbor Pomodoro', tagline: 'Dành chỗ cho sự tập trung', workspace: 'Không gian làm việc', yourDay: 'Ngày của bạn', navigation: 'Điều hướng chính', focus: 'Tập trung', tasks: 'Công việc', stats: 'Thống kê', settings: 'Cài đặt',
   today: 'Hôm nay', thisWeek: 'Tuần này', minutes: 'phút', sessions: 'phiên', session: 'phiên',
   weekView: 'Xem theo tuần', chooseDate: 'Chọn ngày', weekNavigation: 'Chuyển tuần biểu đồ', previousWeek: 'Tuần trước', nextWeek: 'Tuần sau',
   focusSpace: 'Không gian tập trung', focusSubtitle: 'Từng việc một. Những việc khác có thể đợi.',
@@ -54,7 +54,7 @@ const vi: Record<keyof typeof en, string> = {
   drumCrash: 'Chũm chọe crash', drumLeftTom: 'Trống tom trái', drumRightTom: 'Trống tom phải', drumFloorTom: 'Trống tom sàn', drumKick: 'Trống bass', drumSnare: 'Trống snare', drumHiHat: 'Chũm chọe hi-hat',
   timerSize: 'Kích thước tổng thể', clockSize: 'Kích thước số đếm', styleSizeHint: 'Mỗi kiểu lưu kích thước riêng.', smaller: 'Nhỏ hơn', larger: 'Lớn hơn',
   localOnly: 'Dữ liệu chỉ được lưu trên thiết bị này.', closeHint: 'Đóng cửa sổ, bộ đếm vẫn chạy trong khay hệ thống.',
-  updates: 'Cập nhật ứng dụng', updatesHint: 'Cài phiên bản Pomodoro Vibe mới nhất.', currentVersion: 'Phiên bản hiện tại',
+  updates: 'Cập nhật ứng dụng', updatesHint: 'Cài phiên bản My Neighbor Pomodoro mới nhất.', currentVersion: 'Phiên bản hiện tại',
   checkForUpdates: 'Kiểm tra cập nhật', checkingUpdates: 'Đang kiểm tra cập nhật…', upToDate: 'Bạn đang dùng phiên bản mới nhất.',
   updateAvailable: 'Đã có phiên bản {version}', installUpdate: 'Tải và cài đặt', downloadingUpdate: 'Đang tải bản cập nhật', installingUpdate: 'Đang cài đặt. Ứng dụng sẽ khởi động lại.',
   updateCheckFailed: 'Không thể kiểm tra cập nhật. Vui lòng thử lại.', updateInstallFailed: 'Không thể cài bản cập nhật. Vui lòng thử lại.',

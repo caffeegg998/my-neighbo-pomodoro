@@ -1,4 +1,4 @@
-# Pomodoro Vibe
+# My Neighbor Pomodoro
 
 A local-first Pomodoro desktop app for macOS and Windows. Built with Tauri 2, React and TypeScript. The interface supports English and Vietnamese.
 

@@ -11,10 +11,10 @@ APPLE_SIGNING_IDENTITY='-' npm run tauri -- build --bundles app
 
 version=$(node -p "require('./src-tauri/tauri.conf.json').version")
 architecture=$(uname -m)
-output="src-tauri/target/release/bundle/pkg/Pomodoro Vibe_${version}_${architecture}.pkg"
+output="src-tauri/target/release/bundle/pkg/My Neighbor Pomodoro_${version}_${architecture}.pkg"
 mkdir -p src-tauri/target/release/bundle/pkg
 pkgbuild \
-  --component 'src-tauri/target/release/bundle/macos/Pomodoro Vibe.app' \
+  --component 'src-tauri/target/release/bundle/macos/My Neighbor Pomodoro.app' \
   --install-location /Applications \
   --identifier com.pomodorovibe.desktop.pkg \
   --version "$version" \

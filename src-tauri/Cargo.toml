@@ -2,7 +2,7 @@
 name = "pomodoro-vibe"
 version = "0.2.0"
 description = "A calm desktop Pomodoro app"
-authors = ["Pomodoro Vibe"]
+authors = ["My Neighbor Pomodoro"]
 edition = "2021"
 
 [lib]
