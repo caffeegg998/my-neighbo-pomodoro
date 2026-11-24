@@ -33,6 +33,8 @@ On an Apple Silicon Mac, `npm run package:mac` builds an ad-hoc-signed app and a
 
 The **Build desktop installers** GitHub Actions workflow runs on pushes to `main` and can also be started manually. It builds a macOS Arm DMG and Windows x64 `.exe`/`.msi` installers. Download them from the workflow run's **Artifacts** section. The Windows installers have no publisher signature; the macOS app uses an ad-hoc signature and is not notarized. The local `.pkg` is unsigned.
 
+To publish a test prerelease with all three installers, push a release-candidate tag such as `v0.1.0-rc.1`. The same workflow builds both platforms, checks that the `.exe`, `.msi`, and `.dmg` exist, then publishes them as GitHub Release assets.
+
 Desktop icons use `src-tauri/icons/icon.svg` for Windows and PNG sizes; the smaller macOS Dock icon comes from `src-tauri/icons/icon-dock.svg` and is bundled as `icon-dock.icns`.
 
 The app defaults to 25-minute focus, 5-minute short break and 15-minute long break after four completed focus sessions. After each session, the next phase waits for a manual start. macOS can show a native notification once permission is granted. When running Windows from source, completion is indicated by sound and a changed tray icon; opening the window shows the completed state.
