@@ -25,14 +25,17 @@ describe('main workflow', () => {
   it('shows Travel by default and saves the classic timer style', async () => {
     render(<App />);
     await screen.findByText('Your focus space');
+    expect(document.querySelector('main.focus-view.focus-theme-travel')).not.toBeNull();
     expect(document.querySelector('.timer-card-travel .travel-art')).not.toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    expect(document.querySelector('main.focus-view')).toBeNull();
     expect((screen.getByRole('radio', { name: 'Travel' }) as HTMLInputElement).checked).toBe(true);
     expect(document.querySelector('.timer-style-preview-travel .travel-art')).not.toBeNull();
     fireEvent.click(screen.getByRole('radio', { name: 'Classic' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save preferences' }));
     fireEvent.click(screen.getByRole('button', { name: 'Focus' }));
     await waitFor(() => expect(document.querySelector('.timer-card-classic')).not.toBeNull());
+    expect(document.querySelector('main.focus-view.focus-theme-classic')).not.toBeNull();
     expect(document.querySelector('.timer-card-classic .travel-scene')).toBeNull();
     expect((await api.bootstrap()).settings.timerStyle).toBe('classic');
   });

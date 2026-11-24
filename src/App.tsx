@@ -418,7 +418,7 @@ function App() {
       </div>
     </aside>
 
-    <main className="main-area">
+    <main className={`main-area${view === 'focus' ? ` focus-view focus-theme-${settings.timerStyle}` : ''}`}>
       <header className="topbar"><div className="breadcrumb"><span>{t.appName}</span><span className="crumb-slash">/</span><strong>{t[view]}</strong></div><div className="topbar-right"><span className="topbar-date">{new Intl.DateTimeFormat(language, { weekday: 'long', month: 'short', day: 'numeric' }).format(new Date(now))}</span><span className="avatar">PV</span></div></header>
       {loading ? <div className="loading"><IconMark />{t.appName}</div> : <div className="page-content">
         {view === 'focus' && <>
